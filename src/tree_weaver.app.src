@@ -1,0 +1,21 @@
+{application, tree_weaver,
+ [{description, "Dynamic File Structure Generator"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {tree_weaver_app, []}},
+  {applications, [
+     kernel,
+     stdlib,
+     crypto,
+     jsx
+  ]},
+  {env, []},
+  {modules, [
+     tree_weaver_app,
+     tree_weaver_sup,
+     tree_weaver_cli,
+     z
+  ]},
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/zackkitzmiller/tree-weaver"}]}
+ ]}.
