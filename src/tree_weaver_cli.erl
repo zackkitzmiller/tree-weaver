@@ -112,6 +112,7 @@ process_structure_lines(BasePath, Lines, DryRun) ->
         end,
         Paths
     ).
+
 % Parse a tree structure into a list of paths
 parse_tree(Lines) ->
     % Keep track of the current path at each indentation level
@@ -166,7 +167,6 @@ extract_name([C | Rest], Indent, Acc) ->
             extract_name(Rest, Indent + 1, Acc)
     end.
 
-
 % Remove comments from a name
 remove_comments(Name) ->
     % Look for " #" which indicates a comment
@@ -197,7 +197,6 @@ build_path(Paths, MaxIndent) ->
     % Build path from components
     Components = [maps:get(Level, Paths) || Level <- ValidLevels],
     filename:join(Components).
-
 
 % Create a directory or file based on path
 create_node(FullPath, Path, DryRun) ->
@@ -239,7 +238,6 @@ is_directory(Path) ->
                     end
             end
     end.
-
 
 usage() ->
     io:format("Usage: tree-weaver [--dry-run] [--dest PATH] FILENAME~n"),

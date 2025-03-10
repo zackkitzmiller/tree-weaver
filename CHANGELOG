@@ -1,0 +1,35 @@
+# Changelog
+
+All notable changes to Tree Weaver will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Comprehensive test suite
+- GitHub Actions for CI/CD
+- Automated release workflow
+- Just command support
+- Enhanced documentation
+
+## [0.1.0] - 2024-03-10
+
+### Added
+
+- Initial release
+- Basic tree file parsing
+- Directory and file creation
+- Dry run mode
+- Custom destination support
+- Skip root option
+- Comment handling in tree files
+- Basic error handling
+- Template discovery placeholder
+- AI scaffolding placeholder
+- Telemetry system placeholder
+
+[Unreleased]: https://github.com/zackkitzmiller/tree-weaver/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/zackkitzmiller/tree-weaver/releases/tag/v0.1.0

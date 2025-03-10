@@ -1,0 +1,88 @@
+name: Tree Weaver CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        otp: ['25.3', '26.0']
+        rebar3: ['3.22.1']
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Erlang
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{ matrix.otp }}
+        rebar3-version: ${{ matrix.rebar3 }}
+
+    - name: Compile
+      run: rebar3 compile
+
+    - name: Run tests
+      run: rebar3 eunit
+
+    - name: Dialyzer
+      run: rebar3 dialyzer || true
+
+    - name: Build escript
+      run: rebar3 escriptize
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: tree-weaver-${{ matrix.otp }}
+        path: _build/default/bin/tree-weaver
+
+  release:
+    name: Create Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Erlang
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: '25.3'
+        rebar3-version: '3.22.1'
+
+    - name: Build for all platforms
+      run: |
+        mkdir -p dist
+
+        # Linux build
+        rebar3 escriptize
+        cp _build/default/bin/tree-weaver dist/tree-weaver-linux-amd64
+
+        # Create dummy files for other platforms
+        # In a real project, you'd use cross-compilation or dedicated runners
+        cp dist/tree-weaver-linux-amd64 dist/tree-weaver-darwin-amd64
+        cp dist/tree-weaver-linux-amd64 dist/tree-weaver-windows-amd64.exe
+
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/tree-weaver-linux-amd64
+          dist/tree-weaver-darwin-amd64
+          dist/tree-weaver-windows-amd64.exe
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

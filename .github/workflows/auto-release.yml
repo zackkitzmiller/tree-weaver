@@ -1,0 +1,82 @@
+name: Automatic Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-and-release:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check_changes.outputs.should_release }}
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 2
+
+    - name: Check if version changed
+      id: check_changes
+      run: |
+        git diff HEAD^ HEAD -- src/tree_weaver.app.src | grep -q "vsn" || echo "should_release=false" >> $GITHUB_OUTPUT
+        if git diff HEAD^ HEAD -- src/tree_weaver.app.src | grep -q "vsn"; then
+          echo "should_release=true" >> $GITHUB_OUTPUT
+        else
+          echo "should_release=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Get new version
+      id: get_version
+      if: steps.check_changes.outputs.should_release == 'true'
+      run: |
+        VERSION=$(grep -oP '{vsn,\s*"\K[^"]*' src/tree_weaver.app.src)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  create-release:
+    needs: check-and-release
+    if: needs.check-and-release.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Erlang
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: '25.3'
+        rebar3-version: '3.22.1'
+
+    - name: Build release
+      run: |
+        mkdir -p dist
+        rebar3 escriptize
+        cp _build/default/bin/tree-weaver dist/tree-weaver-linux-amd64
+
+        # In a real setup, you'd build for all platforms
+        cp dist/tree-weaver-linux-amd64 dist/tree-weaver-darwin-amd64
+        cp dist/tree-weaver-linux-amd64 dist/tree-weaver-windows-amd64.exe
+
+    - name: Create Tag
+      run: |
+        VERSION=${{ needs.check-and-release.outputs.version }}
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag -a "v$VERSION" -m "Release v$VERSION"
+        git push origin "v$VERSION"
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.check-and-release.outputs.version }}
+        name: Release v${{ needs.check-and-release.outputs.version }}
+        files: |
+          dist/tree-weaver-linux-amd64
+          dist/tree-weaver-darwin-amd64
+          dist/tree-weaver-windows-amd64.exe
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

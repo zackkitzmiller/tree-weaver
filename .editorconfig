@@ -1,0 +1,29 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+# 4 space indentation for Erlang files
+[*.{erl,hrl,app.src,escript}]
+indent_style = space
+indent_size = 4
+
+# Tab indentation for Makefiles
+[Makefile]
+indent_style = tab
+
+# 2 space indentation for config files
+[*.{config,yml,yaml,json}]
+indent_style = space
+indent_size = 2
+
+# Markdown files need trailing whitespace
+[*.md]
+trim_trailing_whitespace = false
