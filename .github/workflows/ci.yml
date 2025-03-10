@@ -40,7 +40,7 @@ jobs:
       run: rebar3 escriptize
 
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: tree-weaver-${{ matrix.otp }}
         path: _build/default/bin/tree-weaver
